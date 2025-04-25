@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 import requests
 from transformers import pipeline
 import os
@@ -9,12 +9,13 @@ app = Flask(__name__)
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
 # Deepgram API config
-DEEPGRAM_API_KEY = "d2f6d9cbcf1dd7c1d7453a60c1a378d05bcb35df"
+DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "your-deepgram-api-key")
 DEEPGRAM_URL = "https://api.deepgram.com/v1/listen"
 
+# Home route for frontend
 @app.route('/')
 def home():
-    return render_template("summary.html")
+    return render_template('index.html')  # Now serving index.html from templates folder
 
 @app.route('/summarize', methods=['POST'])
 def summarize():
@@ -36,3 +37,6 @@ def summarize():
     summary = summarizer(transcript, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
     return jsonify({"summary": summary})
+
+if __name__ == "__main__":
+    app.run(debug=True)
